@@ -1,5 +1,20 @@
 #lang racket
 
+(require srfi/26)
+;;; I've been trying to stick with Racket's own stuff over SRFIs.
+;;; Racket provides curry(r), but cut(e) is IMHO better.
+;;; Consider this...
+;;;
+;;; (λ (id) (vector-set! seats id #t))
+;;;
+;;; With curry(r) we can instead say...
+;;;
+;;; ((curryr ((curry vector-set!) seats)) #t)
+;;;
+;;; But with cut(e):
+;;;
+;;; (cute vector-set! seats <> #t)
+
 ;; Half open range: Max is one past the end
 (define (find-half min max)
   (+ min
@@ -39,11 +54,7 @@
 (define (row-col->id row col)
   (+ col (* row 8)))
 
-;; I'm sure there's an easier way I'm forgetting.
-(define (spec->id spec)
-  (let-values (((row col)
-                (spec->row-col spec)))
-    (row-col->id row col)))
+(define spec->id (compose row-col->id spec->row-col))
 
 (define (test spec)
   (let-values (((row col) (spec->row-col spec))
@@ -60,9 +71,9 @@
 (test "FFFBBBFRRR")
 (test "BBFFBBFRLL")
 
-(display "Highest seat ID in input: ")
+(display "Highest seat ID in input (expect 951): ")
 (with-input-from-file "input.txt"
-  (λ ()
+  (thunk
     (sequence-fold
      max
      0
@@ -73,10 +84,9 @@
 
 (define seats (make-vector 1025 #f))
 (with-input-from-file "input.txt"
-  (λ ()
+  (thunk
     (sequence-for-each
-     (λ (id)
-       (vector-set! seats id #t))
+     (cute vector-set! seats <> #t)
      (sequence-map spec->id (in-lines)))))
 (define first-seat (vector-member #t seats))
 (define good-seats (vector-drop seats first-seat))
@@ -84,5 +94,4 @@
 (vector-ref seats (sub1 my-seat))
 (vector-ref seats my-seat)
 (vector-ref seats (add1 my-seat))
-(printf "My seat: ~a" my-seat)
-
+(printf "My seat (expect 653): ~a" my-seat)
