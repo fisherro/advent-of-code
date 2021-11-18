@@ -2,43 +2,34 @@
 
 (require locale/format)
 
-(define (line-stream)
-  (let ((line (read-line)))
-    (if (eof-object? line)
-        empty-stream
-        (stream-cons line (line-stream)))))
-
 (define (count-trees right down)
   (with-input-from-file "input.txt"
-    (λ ()
-      (third
-       (stream-fold
-        (λ (state line)
-          ;(displayln state)
-          ;(displayln line)
-          (let ((pos (first state))
-                (down-pos (second state))
-                (tree-count (third state)))
-            (cond ((= pos 0)
-                   (list (+ pos right)
-                         (remainder (add1 down-pos) down)
-                         tree-count))
-                  ((not (= down-pos 0))
-                   (list pos
-                         (remainder (add1 down-pos) down)
-                         tree-count))
-                  (else
-                   (list (+ pos right)
-                         (remainder (add1 down-pos) down)
-                         (if (equal?
-                              #\#
-                              (string-ref
-                               line
-                               (remainder pos (string-length line))))
-                             (add1 tree-count)
-                             tree-count))))))
-        (list 0 0 0)
-        (line-stream))))))
+    (thunk
+     (for/fold ((pos 0)
+                (down-pos 0)
+                (tree-count 0)
+                #:result tree-count)
+               ((line (in-lines)))
+       (let ((new-down (remainder (add1 down-pos) down)))
+         (cond ((= pos 0)
+                (values (+ pos right)
+                        new-down
+                        tree-count))
+               ((not (= down-pos 0))
+                (values pos
+                        new-down
+                        tree-count))
+               (else
+                (let ((char (string-ref
+                             line
+                             (remainder
+                              pos
+                              (string-length line)))))
+                  (values (+ pos right)
+                          new-down
+                          (if (equal? #\# char)
+                              (add1 tree-count)
+                              tree-count))))))))))
 
 (printf "1,1: ~a (expect 84)~n" (count-trees 1 1))
 (printf "3,1: ~a (expect 289)~n" (count-trees 3 1))
