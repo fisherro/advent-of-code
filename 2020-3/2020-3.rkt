@@ -1,14 +1,6 @@
 #lang racket
 
-;;; It's time we use/write a file line iterator function
-
-;(define line-reader
-;  (generator ()
-;             (let loop ()
-;               (yield (read-line))
-;               (loop))))
-
-(require racket/stream)
+(require locale/format)
 
 (define (line-stream)
   (let ((line (read-line)))
@@ -48,14 +40,18 @@
         (list 0 0 0)
         (line-stream))))))
 
-(displayln (count-trees 1 1))
-(displayln (count-trees 3 1))
-(displayln (count-trees 5 1))
-(displayln (count-trees 7 1))
-(displayln (count-trees 1 2))
+(printf "1,1: ~a (expect 84)~n" (count-trees 1 1))
+(printf "3,1: ~a (expect 289)~n" (count-trees 3 1))
+(printf "5,1: ~a (expect 89)~n" (count-trees 5 1))
+(printf "7,1: ~a (expect 71)~n" (count-trees 7 1))
+(printf "1,2: ~a (expect 36)~n" (count-trees 1 2))
 
-(displayln (* (count-trees 1 1)
-              (count-trees 3 1)
-              (count-trees 5 1)
-              (count-trees 7 1)
-              (count-trees 1 2)))
+(define answer (* (count-trees 1 1)
+                  (count-trees 3 1)
+                  (count-trees 5 1)
+                  (count-trees 7 1)
+                  (count-trees 1 2)))
+
+(printf "answer: ~a (expect 5,522,401,584)~n"
+        (format-number answer))
+(displayln answer)
