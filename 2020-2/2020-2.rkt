@@ -36,6 +36,24 @@
       ((2) (string-ref value 0))
       (else value))))
 
+;; Destructuring a list with apply & lambda:
+(define (transform4 lst)
+  (apply (λ (n1 n2 c s)
+           (list (string->number n1)
+                 (string->number n2)
+                 (string-ref c 0)
+                 s))
+         lst))
+
+;; Destructuring a list with match:
+(define (transform5 lst)
+  (match lst
+    ((list n1 n2 c s) ; This is the pattern to match against
+     (list (string->number n1)
+           (string->number n2)
+           (string-ref c 0)
+           s))))
+
 ;; Use callback to validate each line of the input.
 ;; Return the count of valid lines.
 (define (process callback)
@@ -47,7 +65,9 @@
        (compose1
         ;transform1
         ;transform2
-        transform3
+        ;transform3
+        ;transform4
+        transform5
         rest
         (cute regexp-match rx <>))
        (in-lines))))))
