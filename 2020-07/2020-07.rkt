@@ -14,6 +14,8 @@
           (string-join (rest it)))))
 
 ;; (ab)using let* this way always feels like bad style
+;; We could reswizzle the results to use hashtables or sorted vectors,
+;; which would make lookups more efficient. But I don't wanna.
 (define (parse-line line)
   (let* ((it (string-trim line #rx"\\."))
          (it (string-replace it #rx"bags?" ""))
@@ -49,6 +51,7 @@
                    (can-contain rules subbag held))))
            contents)))
 
+;; Could use filter instead of for/fold here?
 (define (which-can-contain rules held)
   (for/fold ((results '()))
             ((rule rules))
@@ -60,7 +63,7 @@
 (define rules
   (with-input-from-file "input.txt"
     parse-input))
-;(writeln rules)
+;(for-each writeln rules)
 
 ;(can-contain rules "bright white" "shiny gold")
 ;(can-contain rules "light red" "shiny gold")
@@ -69,4 +72,18 @@
 
 (define containers (which-can-contain rules "shiny gold"))
 (writeln containers)
-(writeln (length containers)) ; 208
+(display "Number of bags that can contain a shiny gold bag: ")
+(displayln (length containers)) ; 208
+
+(define (count-contents rules bag)
+  (define (count-contents-plus-self bag)
+    (define (count-subbag subbag-info)
+      (define n (first subbag-info))
+      (define subbag (second subbag-info))
+      (* n (count-contents-plus-self subbag)))
+    (define contents (second (assoc bag rules)))
+    (foldl + 1 (map count-subbag contents)))
+  (sub1 (count-contents-plus-self bag)))
+
+(display "Number of bags a shiny gold bag must contain: ")
+(count-contents rules "shiny gold") ; 1664
