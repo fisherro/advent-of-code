@@ -65,22 +65,65 @@
 
 ; TODO: Make the above into real tests.
 
+(define (check-list preamble lst)
+  (define q (take lst preamble))
+  (for/fold ((q q))
+            ((n (drop lst preamble))
+             #:break (not (list? q)))
+    (define matches (find-combo n q))
+    (cond (matches
+           (enqueue (dequeue-q q) n))
+          (else
+           n))))
+
 (define (check-file preamble file)
   (with-input-from-file file
     (thunk
-     (define q (for/fold ((q '()))
-                         ((i (in-range preamble))
-                          (line (in-lines)))
-                 (enqueue q (string->number line))))
-     (for/fold ((q q))
-               ((line (in-lines)))
-       (define n (string->number line))
-       (define matches (find-combo n q))
-       (when (not matches) (displayln n))
-       #:break (not matches)
-       (enqueue (dequeue-q q) n)))))
-
+     (check-list preamble (sequence->list
+                           (sequence-map string->number (in-lines)))))))
+    
 (displayln "----")
 (check-file 5 "test.txt") ; 127
 (displayln "----");
-(check-file 25 "input.txt")
+(check-file 25 "input.txt") ; 32321523
+(displayln "----");
+
+(define (find-run sum lst)
+  (cond ((> (length lst) 1)
+         (define result
+           (for/or ((len (in-range 2 (length lst))))
+             (define run (take lst len))
+             (define run-sum (foldl + 0 run))
+             (cond ((= run-sum sum)
+                    run)
+                   ((> run-sum sum)
+                    #t)
+                   (else
+                    #f))))
+         (cond ((list? result)
+                result)
+               (else
+                (find-run sum (rest lst)))))
+        (else
+         #f)))
+
+(define (find-weakness-in-file preamble file)
+  (with-input-from-file file
+    (thunk
+     (define data (sequence->list
+                   (sequence-map string->number (in-lines))))
+     (define invalid (check-list preamble data))
+     (define run (find-run invalid data))
+     (define weakness (+ (argmin values run)
+                         (argmax values run)))
+     #;(writeln data)
+     #;(writeln invalid)
+     #;(writeln weakness)
+     (printf
+      "The encryption weakness of \"~a\" using a preamble length of ~a is ~a.\n"
+      file
+      preamble
+      weakness))))
+
+(find-weakness-in-file 5 "test.txt")
+(find-weakness-in-file 25 "input.txt")
