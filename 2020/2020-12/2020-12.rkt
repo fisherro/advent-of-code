@@ -59,43 +59,36 @@ Action F means to move forward by the given value in the
     (- (exact-round (cos (degrees->radians bearing)))))
   (case (move-instruction the-move)
     [(#\N)
-     (ship (ship-east the-ship)
-           (- (ship-south the-ship)
-              (move-value the-move))
-           (ship-bearing the-ship))]
+     (struct-copy ship the-ship (south (- (ship-south the-ship)
+                                          (move-value the-move))))]
     [(#\S)
-     (ship (ship-east the-ship)
-           (+ (ship-south the-ship)
-              (move-value the-move))
-           (ship-bearing the-ship))]
+     (struct-copy ship the-ship (south (+ (ship-south the-ship)
+                                          (move-value the-move))))]
     [(#\E)
-     (ship (+ (ship-east the-ship)
-              (move-value the-move))
-           (ship-south the-ship)
-           (ship-bearing the-ship))]
+     (struct-copy ship the-ship (east (+ (ship-east the-ship)
+                                         (move-value the-move))))]
     [(#\W)
-     (ship (- (ship-east the-ship)
-              (move-value the-move))
-           (ship-south the-ship)
-           (ship-bearing the-ship))]
+     (struct-copy ship the-ship (east (- (ship-east the-ship)
+                                         (move-value the-move))))]
     [(#\L)
-     (ship (ship-east the-ship)
-           (ship-south the-ship)
-           (add-bearing (ship-bearing the-ship)
-                        (- (move-value the-move))))]
+     (struct-copy ship
+                  the-ship
+                  (bearing (add-bearing (ship-bearing the-ship)
+                                        (- (move-value the-move)))))]
     [(#\R)
-     (ship (ship-east the-ship)
-           (ship-south the-ship)
-           (add-bearing (ship-bearing the-ship)
-                        (move-value the-move)))]
+     (struct-copy ship
+                  the-ship
+                  (bearing (add-bearing (ship-bearing the-ship)
+                                        (move-value the-move))))]
     [(#\F)
-     (ship (+ (ship-east the-ship)
-              (* (move-value the-move)
-                 (my-sin (ship-bearing the-ship))))
-           (+ (ship-south the-ship)
-              (* (move-value the-move)
-                 (my-cos (ship-bearing the-ship))))
-           (ship-bearing the-ship))]))
+     (struct-copy ship
+                  the-ship
+                  (east (+ (ship-east the-ship)
+                           (* (move-value the-move)
+                              (my-sin (ship-bearing the-ship)))))
+                  (south (+ (ship-south the-ship)
+                            (* (move-value the-move)
+                               (my-cos (ship-bearing the-ship))))))]))
 
 (expect '(do-move (ship 0 0 90)
                   (move #\N 10))
@@ -136,3 +129,30 @@ Action F means to move forward by the given value in the
 
 (expect '(part1 "test.txt") 25)
 (expect '(part1 "input.txt") 1631)
+
+#|
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Almost all of the actions indicate how to move a waypoint which is relative to
+the ship's position:
+
+Action N means to move the waypoint north by the given value.
+Action S means to move the waypoint south by the given value.
+Action E means to move the waypoint east by the given value.
+Action W means to move the waypoint west by the given value.
+Action L means to rotate the waypoint around the ship left (counter-clockwise)
+                  the given number of degrees.
+Action R means to rotate the waypoint around the ship right (clockwise) the
+                  given number of degrees.
+Action F means to move forward to the waypoint a number of times equal to the
+                  given value.
+
+The waypoint starts 10 units east and 1 unit north relative to the ship.
+The waypoint is relative to the ship; that is, if the ship moves, the waypoint
+moves with it.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+|#
+
+(struct waypoint (east south) #:transparent)
+(struct ship2 (east south waypoint) #:transparent)
+
+; TODO: Define a point structure that waypoint & ship & ship2 extend?
