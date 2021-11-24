@@ -43,15 +43,15 @@
 
 ; Returns: col-length row-length
 (define (get-lengths seats)
-  (values (vector-length seats)
-          (string-length (vector-ref seats 0))))
+  (values (string-length (vector-ref seats 0))
+          (vector-length seats)))
 
 (define (get-seat seats col row)
   (define-values (col-length row-length) (get-lengths seats))
   (cond [(or (col . < . 0)
              (col . ≥ . col-length)
              (row . < . 0)
-             (row . ≥ . col-length))
+             (row . ≥ . row-length))
          #\.]
         [else
          (string-ref (vector-ref seats row)
@@ -66,7 +66,7 @@
               (get-seat seats (sub1 col) (add1 row))
               (get-seat seats (add1 col) (sub1 row))
               (get-seat seats (add1 col) (add1 row)))
-        (begin (printf "(~a,~a): ~a\n" col row it)
+        #;(begin (printf "(~a,~a): ~a\n" col row it)
                it)
         (count (cute char=? #\# <>)
                it)))
@@ -104,15 +104,19 @@ Otherwise, the seat's state does not change.
              [else
               this])))))
 
-(aand (read-file "test.txt")
-      (begin (write-seats it)
-             it)
-      (begin
-        (write-seats (do-generation-check it))
-        (do-generation it))
-      (begin (write-seats it)
-             it)
-      (begin
-        (write-seats (do-generation-check it))
-        (do-generation it))
-      (write-seats it))
+(define (count-occupied-seats seats)
+  (define (count-row row)
+    (for/sum ((c row))
+      (if (char=? #\# c) 1 0)))
+  (for/sum ((row seats))
+    (count-row row)))
+  
+(define (part1 file)
+  (let loop ((current-seats (read-file file)))
+    (let ((next-seats (do-generation current-seats)))
+      (if (equal? current-seats next-seats)
+          (count-occupied-seats next-seats)
+          (loop next-seats)))))
+
+(expect '(part1 "test.txt") 37)
+(expect '(part1 "input.txt") 2126)
