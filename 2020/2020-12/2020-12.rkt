@@ -115,6 +115,121 @@ Action F means to move forward by the given value in the
                   (move #\F 10))
         (ship 0 10 180))
 
+(struct waypoint (east south) #:transparent)
+(struct ship2 (east south wp) #:transparent)
+
+; Looks like lots of lifting/refactoring opportunities here.
+(define (do-move2 the-ship the-move)
+  (define (my-sin bearing)
+    (exact-round (sin (degrees->radians bearing))))
+  (define (my-cos bearing)
+    (- (exact-round (cos (degrees->radians bearing)))))
+  (case (move-instruction the-move)
+    [(#\N)
+     (struct-copy
+      ship2
+      the-ship
+      (wp (struct-copy
+           waypoint
+           (ship2-wp the-ship)
+           (south
+            (- (waypoint-south (ship2-wp the-ship))
+               (move-value the-move))))))]
+    [(#\S)
+     (struct-copy
+      ship2
+      the-ship
+      (wp (struct-copy
+           waypoint
+           (ship2-wp the-ship)
+           (south
+            (+ (waypoint-south (ship2-wp the-ship))
+               (move-value the-move))))))]
+    [(#\E)
+     (struct-copy
+      ship2
+      the-ship
+      (wp (struct-copy
+           waypoint
+           (ship2-wp the-ship)
+           (east
+            (+ (waypoint-east (ship2-wp the-ship))
+               (move-value the-move))))))]
+    [(#\W)
+     (struct-copy
+      ship2
+      the-ship
+      (wp (struct-copy
+           waypoint
+           (ship2-wp the-ship)
+           (east
+            (- (waypoint-east (ship2-wp the-ship))
+               (move-value the-move))))))]
+    [(#\L)
+     (struct-copy
+      ship2
+      the-ship
+      (wp (rotate-waypoint (ship2-wp the-ship)
+                           (- (move-value the-move)))))]
+    [(#\R)
+     (struct-copy
+      ship2
+      the-ship
+      (wp (rotate-waypoint (ship2-wp the-ship)
+                           (move-value the-move))))]
+    [(#\F)
+     (struct-copy
+      ship2
+      the-ship
+      (east (+ (ship2-east the-ship)
+               (* (waypoint-east (ship2-wp the-ship))
+                  (move-value the-move))))
+      (south (+ (ship2-south the-ship)
+                (* (waypoint-south (ship2-wp the-ship))
+                   (move-value the-move)))))]))
+
+(define (rotate-waypoint wp angle)
+  (define r (degrees->radians angle))
+  (define s (sin r))
+  (define c (cos r))
+  (define x (waypoint-east wp))
+  (define y (waypoint-south wp))
+  (waypoint (exact-round (- (* x c)
+                            (* y s)))
+            (exact-round (+ (* x s)
+                            (* y c)))))
+
+(expect '(rotate-waypoint (waypoint 10 -1) -90)
+        (waypoint -1 -10))
+(expect '(rotate-waypoint (waypoint 10 -1) 90)
+        (waypoint 1 10))
+(expect '(rotate-waypoint (waypoint 0 10) -90)
+        (waypoint 10 0))
+
+(define ship2-start (ship2 0 0 (waypoint 10 -1)))
+
+(expect '(do-move2 ship2-start
+                   (move #\N 10))
+        (ship2 0 0 (waypoint 10 -11)))
+(expect '(do-move2 ship2-start
+                   (move #\S 10))
+        (ship2 0 0 (waypoint 10 9)))
+(expect '(do-move2 ship2-start
+                   (move #\E 10))
+        (ship2 0 0 (waypoint 20 -1)))
+(expect '(do-move2 ship2-start
+                   (move #\W 10))
+        (ship2 0 0 (waypoint 0 -1)))
+(expect '(do-move2 ship2-start
+                   (move #\L 90))
+        (ship2 0 0 (waypoint -1 -10)))
+(expect '(do-move2 ship2-start
+                   (move #\R 90))
+        (ship2 0 0 (waypoint 1 10)))
+(expect '(do-move2 ship2-start
+                   (move #\F 10))
+        (ship2 100 -10 (waypoint 10 -1)))
+
 (define (manhattan-distance x y)
   (+ (abs x)
      (abs y)))
@@ -152,7 +267,19 @@ moves with it.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 |#
 
-(struct waypoint (east south) #:transparent)
-(struct ship2 (east south waypoint) #:transparent)
+(define (part2 file)
+  (define end-ship
+    (for/fold ((the-ship ship2-start))
+              ((the-move (read-file file)))
+      (do-move2 the-ship the-move)))
+  (manhattan-distance (ship2-east end-ship)
+                      (ship2-south end-ship)))
 
-; TODO: Define a point structure that waypoint & ship & ship2 extend?
+(expect '(part2 "test.txt") 286)
+(expect '(part2 "input.txt") 58606)
+
+; I failed this one the first time,
+; because I tried to derive the rotation formulae myself.
+; I remembered there was an issue with arctan,
+; but I tried to figure out how to deal with it.
+; In the end, I just looked up the proper formulae.
