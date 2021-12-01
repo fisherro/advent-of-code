@@ -7,6 +7,10 @@
   (writeln x)
   x)
 
+(define (pl msg x)
+  (printf "~a: ~s\n" msg x)
+  x)
+
 ; A quick unit test function:
 (define-namespace-anchor a)
 (define ns (namespace-anchor->namespace a))
@@ -127,3 +131,26 @@
 
 (expect '(part1 "test.txt") 71)
 (expect '(part1 "input.txt") 19060)
+
+; part 2
+; Filter invalid tickets from nearby tickets.
+; For each column, determine which fields are valid for the valid tickets.
+; Get departure values from my-ticket & multiply them.
+
+(define (validate-ticket fields ticket)
+  (define (validate n)
+    (pl "validate" (andmap (λ (f)
+              ((field-info-valid? f) n))
+            fields)))
+  (andmap validate ticket))
+
+(define (part2a file)
+  (define-values
+    (fields my-ticket nearby-tickets)
+    (with-input-from-file file parse-file))
+  (define valid-tickets (filter (cute validate-ticket fields <>)
+                                nearby-tickets))
+  valid-tickets)
+
+(expect '(part2a "test2.txt")
+        '(("class" 12) ("row" 11) ("seat" 13)))
