@@ -19,7 +19,7 @@
     ((_ form-to-test expected-result)
      (with-syntax ((s (datum->syntax stx (syntax->string #'form-to-test))))
        #'(let ((result form-to-test))
-           (printf "[~a] ~s returned ~s expected ~s\n"
+           (printf "[~a] (~a) returned ~s expected ~s\n"
                    (if (equal? result expected-result)
                        "PASS"
                        "FAIL")
@@ -29,6 +29,6 @@
     ((_ form-to-test)
      (with-syntax ((s (datum->syntax stx (syntax->string #'form-to-test))))
        #'(let ((result form-to-test))
-           (printf "[INFO] ~s returned ~s\n"
+           (printf "[INFO] (~a) returned ~s\n"
                    s
                    result))))))
