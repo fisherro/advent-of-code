@@ -13,14 +13,6 @@
 
 (qtest (add-em 5 5))
 
-#|
-; Racket's tests only print details on failure,
-; but I want details on success too.
-(check-expect (+ 2 2) 4)
-(check-expect (add-em 2 2) 7)
-(test)
-|#
-
 (define (read-data file)
   (with-input-from-file file
     (thunk
