@@ -2,18 +2,16 @@
 
 (require anaphoric)
 (require "../qtest.rkt")
-(define-namespace-anchor a)
-(define ns (namespace-anchor->namespace a))
-;(require test-engine/racket-tests)
 
-(qtest ns '(+ 2 2) 4)
+; Testing qtest itself...
+(qtest (+ 2 2) 4)
 
 (define (add-em a b)
   (+ a b))
 
-(qtest ns '(add-em 2 2) 4)
+(qtest (add-em 2 2) 4)
 
-(qtest ns '(add-em 5 5))
+(qtest (add-em 5 5))
 
 #|
 ; Racket's tests only print details on failure,
@@ -43,8 +41,8 @@
                                  count))
            (loop new-count next (rest remaining))))))
 
-(qtest ns '(part1 "test.txt") 7)
-(qtest ns '(part1 "input.txt"))
+(qtest (part1 "test.txt") 7)
+(qtest (part1 "input.txt"))
 
 (define (part2 file)
   (define data (read-data file))
@@ -64,5 +62,5 @@
                                   count))
            (loop next-count new-window (rest remaining))))))
 
-(qtest ns '(part2 "test.txt") 5)
-(qtest ns '(part2 "input.txt"))
+(qtest (part2 "test.txt") 5)
+(qtest (part2 "input.txt"))
