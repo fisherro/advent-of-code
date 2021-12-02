@@ -2,4 +2,4 @@
 
 My solutions to [Advent of Code](https://adventofcode.com) puzzles.
 
-My solutions may be exemplary code.
+My solutions may _not_ be exemplary code.
