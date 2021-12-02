@@ -56,3 +56,23 @@
 
 (qtest (part2 "test.txt") 5)
 (qtest (part2 "input.txt"))
+
+(define (part2-vector file)
+  (define sum-vector (compose + vector->values))
+  (define (sum-window data index)
+    (sum-vector data index (+ index 3)))
+  (define data (list->vector (read-data file)))
+  #;(printf "data: ~s\n" data)
+  (for/fold ((count 0))
+            ((index (in-range 3 (vector-length data))))
+    (define w1-index (- index 3))
+    (define w2-index (- index 2))
+    (define w1-sum (sum-window data w1-index))
+    (define w2-sum (sum-window data w2-index))
+    #;(printf "index: ~s; w1-index: ~s; w2-index: ~s\n" index w1-index w2-index)
+    (if (w2-sum . > . w1-sum)
+        (add1 count)
+        count)))
+
+(qtest (part2-vector "test.txt") 5)
+(qtest (part2-vector "input.txt"))
