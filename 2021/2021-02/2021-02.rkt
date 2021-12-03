@@ -1,8 +1,6 @@
 #lang racket
 
 (require "../qtest.rkt")
-(require anaphoric)
-(require threading)
 
 (define (parse line)
   (define matches (regexp-match #rx"^([a-z]+) ([0-9]+)$" line))
