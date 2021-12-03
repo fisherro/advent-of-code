@@ -58,9 +58,13 @@
 (qtest (part2 "input.txt"))
 
 (define (part2-vector file)
-  (define sum-vector (compose + vector->values))
   (define (sum-window data index)
-    (sum-vector data index (+ index 3)))
+    ((compose + vector->values) data index (+ index 3)))
+  ; Is compose always preferable to call-with-values?
+  ; It may be more performant.
+  #;(define (sum-window data index)
+    (call-with-values (thunk (vector->values data index (+ index 3)))
+                      +))
   (define data (list->vector (read-data file)))
   #;(printf "data: ~s\n" data)
   (for/fold ((count 0))
