@@ -151,3 +151,5 @@
 
 (qtest (part2 "test.txt") 12)
 (qtest (part2 "input.txt"))
+
+; Maybe refactor with Racket's math arrays?
