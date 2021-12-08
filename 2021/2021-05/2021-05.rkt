@@ -13,17 +13,18 @@
            (map (cute map (compose1 string->number bytes->string/utf-8) <>)
                 it)))))
 
-(define (is-linear? line)
+; This ended up not being used...
+#;(define (orthogonal? line)
   (or (= (first line)
          (third line))
       (= (second line)
          (fourth line))))
 
-(define (is-xline? line)
+(define (xline? line)
   (= (second line)
      (fourth line)))
 
-(define (is-yline? line)
+(define (yline? line)
   (= (first line)
      (third line)))
 
@@ -107,17 +108,17 @@
 (define (draw-lines! the-space data)
   (for ((line data))
     (match-define (list x1 y1 x2 y2) line)
-    (cond ((is-xline? line)
+    (cond ((xline? line)
            (space-add-x! the-space x1 x2 y1))
-          ((is-yline? line)
+          ((yline? line)
            (space-add-y! the-space x1 y1 y2)))))
 
 (define (draw-lines2! the-space data)
   (for ((line data))
     (match-define (list x1 y1 x2 y2) line)
-    (cond ((is-xline? line)
+    (cond ((xline? line)
            (space-add-x! the-space x1 x2 y1))
-          ((is-yline? line)
+          ((yline? line)
            (space-add-y! the-space x1 y1 y2))
           (else
            (space-add-xy! the-space x1 y1 x2 y2)))))
