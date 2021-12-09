@@ -59,6 +59,9 @@ b    .  b    .  .    c  b    c  b    c
 ; For part2, it feels like I should break-out some Prolog...
 ; ...but I didn't.
 ; Racket has a Prolog-like subsystem: Racklog
+; Also: Datalog & miniKanren.
+; miniKanren is from the Reasoned Schemer?
+; I think I have that book. I should read it.
 
 ; Which segments are in each digit...
 ; 0: abc efg 6 (length 6 set: 0 6 9)
