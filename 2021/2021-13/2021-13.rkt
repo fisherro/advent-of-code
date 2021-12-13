@@ -70,6 +70,11 @@
 (qtest (part1 "test.txt") 17)
 (qtest (part1 "input.txt"))
 
+(define-values (dot space)
+  (if #f
+      (values "#" ".")
+      (values "█" " ")))
+
 (define (render-points points)
   (define x-max (apply max (set-map points real-part)))
   (define y-max (apply max (set-map points imag-part)))
@@ -78,7 +83,7 @@
     (when (and (= x 0)
                (not (= y 0)))
       (newline))
-    (display (if (set-member? points (make-rectangular x y)) "#" "."))))
+    (display (if (set-member? points (make-rectangular x y)) dot space))))
 
 (define (part2 file)
   (define-values (start-points folds)
@@ -100,3 +105,6 @@
 ; Which may be more due to my ignorance of complex arithmetic.
 ; Two-element vectors would've probably have been better.
 ; Then it would be easier to write generic code to handle the X & Y cases.
+
+; Harder input from reddit
+(part2 "harder.txt")
