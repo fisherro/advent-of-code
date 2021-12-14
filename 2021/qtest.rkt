@@ -28,7 +28,12 @@
                    expected-result))))
     ((_ form-to-test)
      (with-syntax ((s (datum->syntax stx (syntax->string #'form-to-test))))
-       #'(let ((result form-to-test))
-           (printf "[INFO] (~a) returned ~s\n"
-                   s
-                   result))))))
+       #'(let ((results (call-with-values (thunk form-to-test) list)))
+           (cond (((length results) . > . 1)
+                  (printf "[INFO] (~a) returned multiple results:\n"
+                          s)
+                  (for-each writeln results))
+                 (else
+                  (printf "[INFO] (~a) return ~s\n"
+                          s
+                          (first results)))))))))
