@@ -155,27 +155,24 @@
 6: <
 7: =
 |#
+
+(define (type->op pkt)
+  (case (packet-type pkt)
+    ((0) +)
+    ((1) *)
+    ((2) min)
+    ((3) max)
+    ((5) (compose1 boolean->number >))
+    ((6) (compose1 boolean->number <))
+    ((7) (compose1 boolean->number =))))
+
 (define (eval-packet pkt)
   (case (packet-type pkt)
-    ((0)
-     (apply + (map eval-packet (operator-packet-subpackets pkt))))
-    ((1)
-     (apply * (map eval-packet (operator-packet-subpackets pkt))))
-    ((2)
-     (apply min (map eval-packet (operator-packet-subpackets pkt))))
-    ((3)
-     (apply max (map eval-packet (operator-packet-subpackets pkt))))
+    ((0 1 2 3 5 6 7)
+     (apply (type->op pkt)
+            (map eval-packet (operator-packet-subpackets pkt))))
     ((4)
-     (literal-packet-value pkt))
-    ((5)
-     (boolean->number
-      (apply > (map eval-packet (operator-packet-subpackets pkt)))))
-    ((6)
-     (boolean->number
-      (apply < (map eval-packet (operator-packet-subpackets pkt)))))
-    ((7)
-     (boolean->number
-      (apply = (map eval-packet (operator-packet-subpackets pkt)))))))
+     (literal-packet-value pkt))))
 
 ; Parse the packets & add up the version numbers
 (define (part1 data)
