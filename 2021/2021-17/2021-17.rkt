@@ -3,6 +3,9 @@
 (require "../qtest.rkt")
 (require threading)
 
+(define ≤ <=)
+(define ≥ >=)
+
 ; Run simulation
 ; If target area hit, return highest y reached.
 ; Otherwise, return false.
@@ -12,10 +15,10 @@
              (Δx Δx₀)
              (Δy Δy₀)
              (highest 0))
-    (cond ((and (x . >= . min-x)
-                (x . <= . max-x)
-                (y . >= . min-y)
-                (y . <= . max-y))
+    (cond ((and (x . ≥ . min-x)
+                (x . ≤ . max-x)
+                (y . ≥ . min-y)
+                (y . ≤ . max-y))
            highest)
           ((or (x . > . max-x)
                (y . < . min-y))
