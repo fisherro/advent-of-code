@@ -22,7 +22,7 @@ To decode a file:
 
 To encode the text "This is a test!" with 10 folds:
 
-    $ echo "This is a test!" | racket encode.rkt 10
+    $ racket encode.rkt "This is a test!" 10
 
 Note that `font8x8_basic.h` needs to be in the current working directory when running `encode.rkt`.
 

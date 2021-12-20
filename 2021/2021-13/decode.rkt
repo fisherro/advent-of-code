@@ -69,4 +69,22 @@
   (render-points folded-points)
   (newline))
 
-(decode)
+(define test-data
+  (string-append
+   "27,0\n27,1\n26,2\n28,2\n26,3\n26,4\n26,5\n29,5\n28,6\n18,2\n20,2\n16,3\n17,4\n"
+   "19,4\n20,5\n16,6\n18,6\n20,6\n10,2\n12,2\n9,3\n13,3\n9,4\n11,4\n13,4\n9,5\n10,"
+   "6\n12,6\n1,0\n3,0\n5,0\n2,1\n5,1\n3,2\n3,3\n3,4\n3,5\n2,6\n4,6\n26,15\n25,14\n"
+   "27,14\n29,14\n27,13\n27,12\n27,11\n27,10\n17,14\n19,14\n21,14\n17,13\n18,12\n2"
+   "0,12\n21,11\n17,10\n19,10\n9,14\n11,14\n8,13\n12,13\n8,12\n10,12\n12,12\n8,11"
+   "\n9,10\n11,10\n0,16\n2,16\n4,16\n0,15\n3,15\n2,14\n2,13\n2,12\n2,11\n1,10\n3,10"
+   "\n\nfold along y=8\n"))
+
+(define (decode-test)
+  (with-input-from-string test-data
+    (thunk (decode))))
+
+; I'm not sure this is the best way, but...
+; If TERM isn't defined, assume we're running in DrRacket.
+(if (getenv "TERM")
+    (decode)
+    (decode-test))
