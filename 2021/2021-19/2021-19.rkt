@@ -1,5 +1,21 @@
 #lang racket
 
+#|
+TODO:
+
+In at least some cases, it would probably be better to use sets than lists.
+
+Matches can be done by relative distances to avoid rotating & translating up front.
+
+If we merge each match into scanner zero's data we can avoid the frame-mapping mess I have.
+e.g. Find a match for scanner zero.
+     Merge its data into scanner zero.
+     Find another match for the improved scanner zero.
+     Repeat.
+
+There may opportunities to memoize or otherwise avoid duplicating work.
+|#
+
 (require threading)
 (require srfi/26)
 (require "../qtest.rkt")
@@ -154,24 +170,24 @@ for each orientation
   ; If there are possible multiple matches, may need for/list here.
   (for/or ((o orientations))
     (define r (rotate-points o (scanner-beacons b)))
-    (for/or ((a-main (scanner-beacons a)))
-      (for/or ((b-main r))
-        (define translation (calc-translation b-main a-main))
-        (when (and (equal? a-main '(-618 -824 -621))
-                   (equal? b-main '(-686 422 -578)))
-          (printf "A-main: ~s; b-main: ~s; translation: ~s\n"
-                  a-main
-                  b-main
-                  translation))
-        (define t (translate-points translation r))
-        (define intersection (intersect (scanner-beacons a)
-                                        t))
-        (cond (((length intersection) . >= . 12)
-               (frame-mapping (scanner-number a)
-                              (scanner-number b)
-                              o
-                              translation))
-              (else #f))))))
+    (for*/or ((a-main (scanner-beacons a))
+              (b-main r))
+      (define translation (calc-translation b-main a-main))
+      (when (and (equal? a-main '(-618 -824 -621))
+                 (equal? b-main '(-686 422 -578)))
+        (printf "A-main: ~s; b-main: ~s; translation: ~s\n"
+                a-main
+                b-main
+                translation))
+      (define t (translate-points translation r))
+      (define intersection (intersect (scanner-beacons a)
+                                      t))
+      (cond (((length intersection) . >= . 12)
+             (frame-mapping (scanner-number a)
+                            (scanner-number b)
+                            o
+                            translation))
+            (else #f)))))
 
 (define (read-scanners file)
   (with-input-from-file file
@@ -307,20 +323,17 @@ for: expected a sequence for fmap, got something else:
 
 (define (part1 file)
   (define scanners (read-scanners file))
-  (printf "Scanners read\n")
+  #;(printf "Scanners read\n")
   (define fmap-list (build-fmap-list scanners))
-  (printf "Built fmap-list\n~s\n" fmap-list)
+  #;(printf "Built fmap-list\n~s\n" fmap-list)
   (define fmap-hash (build-fmap-hash scanners fmap-list))
-  (printf "Built fmap-hash\n~s\n" fmap-hash)
+  #;(printf "Built fmap-hash\n~s\n" fmap-hash)
   (~> (cons (scanner-beacons (first scanners))
             (for/list ((scanner (rest scanners)))
               (map-frame scanner fmap-hash)))
       (apply append _)
       (list->set _)
       (set-count _)))
-
-#;(qtest (part1 "test.txt") 79)
-#;(qtest (part1 "input.txt"))
 
 (define (mh-distance a b)
   (~> (map - a b)
@@ -344,5 +357,7 @@ for: expected a sequence for fmap, got something else:
       (map (cute apply mh-distance <>) _)
       (apply max _)))
 
+(qtest (part1 "test.txt") 79)
+#;(qtest (part1 "input.txt"))
 (qtest (part2 "test.txt") 3621)
-(qtest (part2 "input.txt"))
+#;(qtest (part2 "input.txt"))
