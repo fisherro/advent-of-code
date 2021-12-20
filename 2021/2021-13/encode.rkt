@@ -214,6 +214,7 @@
   (newline)
   (displayln fold))
 
+; TODO: Handle doing multiple unfolds
 (define args (current-command-line-arguments))
 (define the-text
   (if ((vector-length args) . < . 1)
